@@ -8,6 +8,8 @@
 # the default value. If it is not, we set the default value.
 #
 # Nodes are also added that are not children of the edited scene.
+# So it is required to filter them out. For that we implement a filter that 
+# checks if the node is a child of the edited scene root node.
 
 
 @tool
@@ -28,28 +30,14 @@ func _record_scene_nodes(node: Node) -> void:
     for child in node.get_children():
         _record_scene_nodes(child)
 
-func is_node1_and_ancestor_of_node(node1: Node, node: Node) -> bool:
-    for child in node1.get_children():
-        if child.get_instance_id() == node.get_instance_id():
-            return true
-        else:
-            if is_node1_and_ancestor_of_node(child, node):
-                return true
-    return false
-
-func is_node_in_scene(node: Node) -> bool:
-    if null != current_scene_root:
-        return is_node1_and_ancestor_of_node(current_scene_root, node)
-    return false
-
-
 func _on_node_added(node: Node) -> void:
     var id = node.get_instance_id()
     #print(current_scene_nodes)
     if id in current_scene_nodes:
         return
     # Test if current_scene_root is an ancestor of node
-    if not is_node_in_scene(node):
+    if not current_scene_root.is_ancestor_of(node):
+    #if not is_node_in_scene(node):
         return
     print("Node added ", id)
     print("  name: ", node.get_name())
